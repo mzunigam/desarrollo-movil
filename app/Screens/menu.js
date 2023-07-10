@@ -1,22 +1,55 @@
-import {LinearGradient} from "expo-linear-gradient";
-import {StyleSheet, Text, View, Image, TouchableOpacity} from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
+import { StyleSheet, Text, View, Image, TouchableOpacity } from "react-native";
 import Icon from 'react-native-vector-icons/FontAwesome';
-import {useEffect, useState} from "react";
+import { useEffect, useState } from "react";
+import {MessageBubble} from "../Components/messageBubble"
 
 export const Menu = (prop) => {
 
     const [product, setProduct] = useState([]);
-
+    const [isVisible, setIsVisible] = useState('');
+    const [notification,setNotification] = useState('');
     const getProducts = async () => {
-        const response = await fetch('http://3.138.124.248:8081/api/producto/find');
+        const response = await fetch('http://74.208.94.23:8082/api/producto/find');
         const json = await response.json();
-        console.log(json)
         setProduct(json);
     }
 
     useEffect(() => {
         getProducts();
-    }, []);
+    }, [0]);
+
+    const goToEdit = (item) => {
+        prop.navigation.navigate('actualizar',
+            {
+                username: prop?.route?.params?.username,
+                item: item
+            });
+    };
+
+    const gotoCreate = () => {
+        prop.navigation.navigate('registrar',
+            {
+                username: prop?.route?.params?.username
+            });
+    };
+
+    const deleteProduct = async (item) => {
+
+        try {
+        await fetch('http://74.208.94.23:8082/api/producto/delete/'+item.id);
+        setNotification('Se ha eliminado '+item.nombre);
+        setIsVisible('good');
+        }catch(e){
+            console.log(e);
+            setNotification('Ha ocurrido un error');
+            setIsVisible('error');
+        }
+        setTimeout( () => {
+            setIsVisible('');
+            setNotification('');
+        },3000);
+    }
 
     return (
         <View style={styles.container}>
@@ -25,46 +58,46 @@ export const Menu = (prop) => {
                     <Text style={styles.text}>
                         Bienvenido {prop?.route?.params?.username || 'Usuario'}
                     </Text>
-                    <Image source={require('../Assets/logo.png')} style={{width: 50, height: 50}}/>
+                    <Image source={require('../Assets/logo.png')} style={{ width: 50, height: 50 }} />
                 </View>
                 <View style={styles.bodycontainer}>
                     <View style={styles.buttoncontainer}>
                         <TouchableOpacity style={styles.buttonRegistrar}>
-                            <Text style={styles.buttonText}>Nuevo
-                                <Icon name="plus" size={15} color="#b876ff"/>
+                            <Text style={styles.buttonText} onPress={() => gotoCreate()}>Nuevo
+                                <Icon name="plus" size={15} color="#b876ff" />
                             </Text>
                         </TouchableOpacity>
                     </View>
                     <View style={styles.listView}>
                         {
                             product.map((item, index) => {
-                                return (<View id={index} style={styles.card}>
+                                return (<View key={index} style={styles.card}>
                                     <View style={styles.textView}>
                                         <Text style={styles.cardText}>{item.nombre}</Text>
                                         <Text style={styles.cardDesc}>{item.descripcion}</Text>
                                     </View>
                                     <View style={styles.actionsView}>
-                                        <Text style={{...styles.cardDesc, marginBottom: 5}}>Stock: {item.stock}</Text>
+                                        <Text style={{ ...styles.cardDesc, marginBottom: 5 }}>Stock: {item.stock}</Text>
                                         <View style={{
                                             display: 'flex',
                                             flexDirection: 'row',
                                             gap: 10
                                         }}>
-                                            <TouchableOpacity style={{
+                                            <TouchableOpacity id={'edit_' + index} onPress={() => goToEdit(item)} style={{
                                                 backgroundColor: 'rgba(255,255,255,0.13)',
                                                 padding: 5,
                                                 width: 30,
                                                 borderRadius: 5
                                             }}>
-                                                <Icon name="edit" size={20} color="#ffffffaa"/>
+                                                <Icon name="edit" size={20} color="#ffffffaa" />
                                             </TouchableOpacity>
-                                            <TouchableOpacity style={{
+                                            <TouchableOpacity d={'delete' + index} onPress={()=> deleteProduct(item)} style={{
                                                 backgroundColor: 'rgba(255,255,255,0.13)',
                                                 padding: 5,
                                                 width: 30,
                                                 borderRadius: 5
                                             }}>
-                                                <Icon name="trash" size={20} color="#ffffffaa"/>
+                                                <Icon name="trash" size={20} color="#ffffffaa" />
                                             </TouchableOpacity>
                                         </View>
                                     </View>
@@ -72,6 +105,7 @@ export const Menu = (prop) => {
                             })
                         }
                     </View>
+                    <MessageBubble text={notification} whatType={isVisible} />
                 </View>
             </LinearGradient>
         </View>

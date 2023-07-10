@@ -5,6 +5,14 @@
       "bundler": "metro"
     },
     "name": "desarrollo-movil",
-    "slug": "desarrollo-movil"
+    "slug": "desarrollo-movil",
+    "extra": {
+      "eas": {
+        "projectId": "f0aa4b12-4aa8-487d-8ecf-1699e63af2ed"
+      }
+    },
+    "android": {
+      "package": "com.paolo2705.desarrollomovil"
+    }
   }
 }

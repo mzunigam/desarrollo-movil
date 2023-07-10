@@ -1,8 +1,70 @@
 import { LinearGradient } from "expo-linear-gradient";
-import { StyleSheet, Text, View, Image, TouchableOpacity,TextInput } from "react-native";
-import Icon from 'react-native-vector-icons/FontAwesome';
+import { useState } from "react";
+import { StyleSheet, Text, View, Image, TouchableOpacity, TextInput } from "react-native";
+import {MessageBubble} from "../Components/messageBubble"
+import { useRef } from "react";
 
-export const registrarProduct = () => {
+export const RegistrarProduct = (prop) => {
+
+    const nombre = useRef(null);
+    const descripcion = useRef(null);
+    const precio = useRef(null);
+    const stock = useRef(null);
+    const registrar = useRef(null);
+    const [isVisible, setIsVisible] = useState('');
+    const [notification,setNotification] = useState('');
+
+    const getBack = () => {
+        prop.navigation.navigate('menu',
+            {
+                username: prop?.route?.params?.username
+            });
+    };
+
+    const createProducto = async () => {
+
+        registrar.current.setNativeProps({ disabled: true });
+        
+        const json = {
+            nombre: nombre.current.value,
+            descripcion: descripcion.current.value,
+            precio: parseInt(precio.current.value),
+            stock: parseInt(stock.current.value),
+        };
+
+        console.log(json);
+
+        try {
+            await fetch('http://74.208.94.23:8082/api/producto/save/null',
+            {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(json)
+            }
+            );
+            setNotification('Se ha registrado el nuevo producto');
+            setIsVisible('good');
+            }catch(e){
+                console.log(e);
+                setNotification('Ha ocurrido un error');
+                setIsVisible('error');
+            }
+
+            setTimeout( () => {
+                if(isVisible === 'good'){
+                    prop.navigation.navigate('menu',
+                    {
+                        username: prop?.route?.params?.username
+                    });
+                }
+                setIsVisible('');
+                setNotification('');
+                registrar.current.setNativeProps({ disabled: false });
+            },3000);
+
+
+    };
+
     return (
         <>
             <View style={styles.container}>
@@ -12,34 +74,52 @@ export const registrarProduct = () => {
                         {/* <Image source={require('../Assets/logo.png')} style={styles.image} /> */}
                     </View>
                     <View style={styles.input_container}>
+                        <Text style={{ width: '70%', justifyContent: 'left', color: 'white', marginBottom: 5 }} aria-label="Nombre" nativeID="nombre">Nombre</Text>
                         <TextInput
+                            id="nombre"
+                            ref={nombre}
                             style={styles.input}
-                            placeholder="Nombre"
+                            placeholder="..."
                             autoCapitalize="none"
                             placeholderTextColor={'white'}
                         />
+                        <Text style={{ width: '70%', justifyContent: 'left', color: 'white', marginBottom: 5 }} aria-label="Descripcion" nativeID="descripcion">Descripcion</Text>
                         <TextInput
+                            id="descripcion"
+                            ref={descripcion}
                             style={styles.input}
-                            placeholder="Categoria"
+                            placeholder="..."
                             autoCapitalize="none"
                             placeholderTextColor={'white'}
                         />
+                        <Text style={{ width: '70%', justifyContent: 'left', color: 'white', marginBottom: 5 }} aria-label="Precio" nativeID="precio">Precio</Text>
                         <TextInput
+                            id="precio"
+                            ref={precio}
                             style={styles.input}
-                            placeholder="Precio"
+                            placeholder="..."
                             autoCapitalize="none"
                             placeholderTextColor={'white'}
                         />
+                        <Text style={{ width: '70%', justifyContent: 'left', color: 'white', marginBottom: 5 }} aria-label="Stock" nativeID="stock">Stock</Text>
                         <TextInput
+                            id="stock"
+                            ref={stock}
                             style={styles.input}
-                            placeholder="Imagen"
+                            placeholder="..."
                             autoCapitalize="none"
                             placeholderTextColor={'white'}
                         />
                     </View>
-                    <TouchableOpacity style={styles.button}>
-                        <Text style={styles.buttonText}>Registrar</Text>
-                    </TouchableOpacity>
+                    <View style={styles.buttonVIew}>
+                        <TouchableOpacity style={{...styles.button,backgroundColor: '#ffffff'}} ref={registrar} onPress={() => createProducto()}>
+                            <Text style={{...styles.buttonText,color:'black'}}>Registrar</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={{...styles.button,backgroundColor: '#ee0000'}} onPress={() => getBack()}>
+                            <Text style={{...styles.buttonText,color:'white'}}>Volver</Text>
+                        </TouchableOpacity>
+                    </View>
+                    <MessageBubble text={notification} whatType={isVisible} />
                 </LinearGradient>
             </View>
         </>
@@ -75,8 +155,15 @@ const styles = StyleSheet.create({
         paddingLeft: 8,
         color: 'white',
     },
+    buttonVIew: {
+        width: '100%',
+        alignItems: 'center',
+        bottom: 50,
+        display: 'flex',
+        justifyContent: 'center',
+        gap: 10,
+    },
     button: {
-        backgroundColor: 'white',
         width: '50%',
         height: 40,
         justifyContent: 'center',
@@ -85,7 +172,6 @@ const styles = StyleSheet.create({
         marginBottom: 16,
     },
     buttonText: {
-        color: 'black',
         fontWeight: 'bold',
     },
     image: {
