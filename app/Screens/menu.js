@@ -1,12 +1,22 @@
 import {LinearGradient} from "expo-linear-gradient";
 import {StyleSheet, Text, View, Image, TouchableOpacity} from "react-native";
 import Icon from 'react-native-vector-icons/FontAwesome';
+import {useEffect, useState} from "react";
 
 export const Menu = (prop) => {
 
-    const getProducts  = async () => {
-        
+    const [product, setProduct] = useState([]);
+
+    const getProducts = async () => {
+        const response = await fetch('http://3.138.124.248:8081/api/producto/find');
+        const json = await response.json();
+        console.log(json)
+        setProduct(json);
     }
+
+    useEffect(() => {
+        getProducts();
+    }, []);
 
     return (
         <View style={styles.container}>
@@ -26,27 +36,41 @@ export const Menu = (prop) => {
                         </TouchableOpacity>
                     </View>
                     <View style={styles.listView}>
-                        <View style={styles.card}>
-                            <View style={styles.textView}>
-                                <Text style={styles.cardText}>Test</Text>
-                                <Text style={styles.cardDesc}>Producto test</Text>
-                            </View>
-                            <View style={styles.actionsView}>
-                                <Text style={{...styles.cardDesc,marginBottom: 5}}>Stock: 100</Text>
-                                <View style={{
-                                    display: 'flex',
-                                    flexDirection: 'row',
-                                    gap: 10
-                                }}>
-                                    <TouchableOpacity style={{backgroundColor: 'rgba(255,255,255,0.13)',padding: 5, width: 30, borderRadius: 5}}>
-                                        <Icon name="edit" size={20} color="#ffffffaa"/>
-                                    </TouchableOpacity>
-                                    <TouchableOpacity style={{backgroundColor: 'rgba(255,255,255,0.13)',padding: 5, width: 30, borderRadius: 5}}>
-                                        <Icon name="trash" size={20} color="#ffffffaa"/>
-                                    </TouchableOpacity>
-                                </View>
-                            </View>
-                        </View>
+                        {
+                            product.map((item, index) => {
+                                return (<View id={index} style={styles.card}>
+                                    <View style={styles.textView}>
+                                        <Text style={styles.cardText}>{item.nombre}</Text>
+                                        <Text style={styles.cardDesc}>{item.descripcion}</Text>
+                                    </View>
+                                    <View style={styles.actionsView}>
+                                        <Text style={{...styles.cardDesc, marginBottom: 5}}>Stock: {item.stock}</Text>
+                                        <View style={{
+                                            display: 'flex',
+                                            flexDirection: 'row',
+                                            gap: 10
+                                        }}>
+                                            <TouchableOpacity style={{
+                                                backgroundColor: 'rgba(255,255,255,0.13)',
+                                                padding: 5,
+                                                width: 30,
+                                                borderRadius: 5
+                                            }}>
+                                                <Icon name="edit" size={20} color="#ffffffaa"/>
+                                            </TouchableOpacity>
+                                            <TouchableOpacity style={{
+                                                backgroundColor: 'rgba(255,255,255,0.13)',
+                                                padding: 5,
+                                                width: 30,
+                                                borderRadius: 5
+                                            }}>
+                                                <Icon name="trash" size={20} color="#ffffffaa"/>
+                                            </TouchableOpacity>
+                                        </View>
+                                    </View>
+                                </View>);
+                            })
+                        }
                     </View>
                 </View>
             </LinearGradient>
