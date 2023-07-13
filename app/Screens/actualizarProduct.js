@@ -6,17 +6,15 @@ import {MessageBubble} from "../Components/messageBubble"
 
 export const ActualizarProduct = (prop) => {
 
-    const [producto, setProducto] = useState(null);
-    const nombre = useRef(null);
-    const descripcion = useRef(null);
-    const precio = useRef(null);
-    const stock = useRef(null);
-    const actualizar = useRef(null);
+    const [nombre,setNombre] = useState(prop?.route?.params?.item?.nombre || '');
+    const [descripcion,setDescripcion] = useState(prop?.route?.params?.item?.descripcion || '');
+    const [precio,setPrecio] = useState(prop?.route?.params?.item?.precio || '');
+    const [stock,setStock] = useState(prop?.route?.params?.item?.stock || '');
     const [isVisible, setIsVisible] = useState('');
     const [notification,setNotification] = useState('');
 
     useEffect(() => {
-        setProducto(prop?.route?.params?.item);
+        
     }, [0]);
 
     const getBack = () => {
@@ -27,18 +25,16 @@ export const ActualizarProduct = (prop) => {
     };
 
     const updateProducto = async () => {
-
-        actualizar.current.setNativeProps({ disabled: true });
         
         const json = {
-            nombre: nombre.current,
-            descripcion: descripcion.current,
-            precio: precio.current,
-            stock: stock.current,
+            nombre: nombre,
+            descripcion: descripcion,
+            precio: parseInt(precio) || 0,
+            stock: parseInt(stock) || 0,
         };
 
         try {
-            await fetch('http://74.208.94.23:8082/api/producto/save/'+producto.id,
+            await fetch('http://74.208.94.23:8082/api/producto/save/'+prop?.route?.params?.item?.id,
             {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -47,6 +43,10 @@ export const ActualizarProduct = (prop) => {
             );
             setNotification('Se ha actualizado correctamente');
             setIsVisible('good');
+            prop.navigation.navigate('menu',
+            {
+                username: prop?.route?.params?.username
+            });
             }catch(e){
                 console.log(e);
                 setNotification('Ha ocurrido un error');
@@ -55,7 +55,7 @@ export const ActualizarProduct = (prop) => {
             setTimeout( () => {
                 setIsVisible('');
                 setNotification('');
-                actualizar.current.setNativeProps({ disabled: false });
+
             },3000);
 
             if(isVisible === 'good'){
@@ -68,56 +68,55 @@ export const ActualizarProduct = (prop) => {
             <View style={styles.container}>
                 <LinearGradient colors={['#b876ff', '#8432ff']} style={styles.container}>
                     <View style={styles.image_container}>
-                        <Text style={styles.heading}>{producto?.nombre || ''} esta siendo modificado</Text>
+                        <Text style={styles.heading}>{prop?.route?.params?.item?.nombre || ''} esta siendo modificado</Text>
                         {/* <Image source={require('../Assets/logo.png')} style={styles.image} /> */}
                     </View>
-                    {producto === null ? 'Cargando' : (
+                    {[undefined,null].includes(prop?.route?.params?.item) ? null : (
                         <View style={styles.input_container}>
                             <Text style={{ width: '70%', justifyContent: 'left', color: 'white', marginBottom: 5 }} aria-label="Nombre" nativeID="nombre">Nombre</Text>
                             <TextInput
-                                id="nombre"
-                                ref={nombre}
-                                value={producto?.nombre}
-                                flat={true}
+                                name="nombre"
+                                value={nombre}
                                 style={styles.input}
                                 placeholder="..."
                                 autoCapitalize="none"
+                                onChangeText={setNombre}
                                 placeholderTextColor={'white'}
                             />
                             <Text style={{ width: '70%', justifyContent: 'left', color: 'white', marginBottom: 5 }} aria-label="Descripcion" nativeID="descripcion">Descripcion</Text>
                             <TextInput
                                 id="descripcion"
-                                ref={descripcion}
-                                value={producto?.descripcion}
+                                value={descripcion}
                                 style={styles.input}
                                 placeholder="..."
+                                onChangeText={setDescripcion}
                                 autoCapitalize="none"
                                 placeholderTextColor={'white'}
                             />
                             <Text style={{ width: '70%', justifyContent: 'left', color: 'white', marginBottom: 5 }} aria-label="Precio" nativeID="precio">Precio</Text>
                             <TextInput
-                                id="precio"
-                                ref={precio}
-                                value={producto?.precio}
+                                name="precio"
+                                value={precio}
                                 style={styles.input}
                                 placeholder="..."
                                 autoCapitalize="none"
+                                onChangeText={setPrecio}
                                 placeholderTextColor={'white'}
                             />
                             <Text style={{ width: '70%', justifyContent: 'left', color: 'white', marginBottom: 5 }} aria-label="Stock" nativeID="stock">Stock</Text>
                             <TextInput
-                                id="stock"
-                                ref={stock}
-                                value={producto?.stock}
+                                name="stock"
+                                value={stock}
                                 style={styles.input}
                                 placeholder="..."
                                 autoCapitalize="none"
+                                onChangeText={setStock}
                                 placeholderTextColor={'white'}
                             />
                         </View>
                     )}
                     <View style={styles.buttonVIew}>
-                        <TouchableOpacity style={{ ...styles.button, backgroundColor: '#ffffff' }} href={actualizar} onPress={() => updateProducto()}>
+                        <TouchableOpacity style={{ ...styles.button, backgroundColor: '#ffffff' }} onPress={() => updateProducto()}>
                             <Text style={{ ...styles.buttonText, color: 'black' }}>Actualizar</Text>
                         </TouchableOpacity>
                         <TouchableOpacity style={{ ...styles.button, backgroundColor: '#ee0000' }} onPress={() => getBack()}>

@@ -1,7 +1,7 @@
 import { LinearGradient } from "expo-linear-gradient";
 import { useState } from "react";
 import { StyleSheet, Text, View, Image, TouchableOpacity, TextInput } from "react-native";
-import {MessageBubble} from "../Components/messageBubble"
+import { MessageBubble } from "../Components/messageBubble"
 import { useRef } from "react";
 
 export const RegistrarProduct = (prop) => {
@@ -12,7 +12,8 @@ export const RegistrarProduct = (prop) => {
     const stock = useRef(null);
     const registrar = useRef(null);
     const [isVisible, setIsVisible] = useState('');
-    const [notification,setNotification] = useState('');
+    const [notification, setNotification] = useState('');
+    const [canSeen, setCanSeen] = useState(false);
 
     const getBack = () => {
         prop.navigation.navigate('menu',
@@ -23,44 +24,40 @@ export const RegistrarProduct = (prop) => {
 
     const createProducto = async () => {
 
-        registrar.current.setNativeProps({ disabled: true });
-        
         const json = {
             nombre: nombre.current.value,
             descripcion: descripcion.current.value,
-            precio: parseInt(precio.current.value),
-            stock: parseInt(stock.current.value),
+            precio: parseInt(precio.current.value)|| 0,
+            stock: parseInt(stock.current.value)|| 0,   
         };
-
-        console.log(json);
 
         try {
             await fetch('http://74.208.94.23:8082/api/producto/save/null',
-            {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(json)
-            }
+                {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(json)
+                }
             );
             setNotification('Se ha registrado el nuevo producto');
             setIsVisible('good');
-            }catch(e){
-                console.log(e);
-                setNotification('Ha ocurrido un error');
-                setIsVisible('error');
-            }
+            setCanSeen(true);
+            prop.navigation.navigate('menu',
+            {
+                username: prop?.route?.params?.username
+            });
+        } catch (e) {
+            console.log(e);
+            setNotification('Ha ocurrido un error');
+            setIsVisible('error');
+            setCanSeen(false);
+        }
 
-            setTimeout( () => {
-                if(isVisible === 'good'){
-                    prop.navigation.navigate('menu',
-                    {
-                        username: prop?.route?.params?.username
-                    });
-                }
-                setIsVisible('');
-                setNotification('');
-                registrar.current.setNativeProps({ disabled: false });
-            },3000);
+        setTimeout(() => {
+            setIsVisible('');
+            setNotification('');
+
+        }, 3000);
 
 
     };
@@ -112,11 +109,12 @@ export const RegistrarProduct = (prop) => {
                         />
                     </View>
                     <View style={styles.buttonVIew}>
-                        <TouchableOpacity style={{...styles.button,backgroundColor: '#ffffff'}} ref={registrar} onPress={() => createProducto()}>
-                            <Text style={{...styles.buttonText,color:'black'}}>Registrar</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity style={{...styles.button,backgroundColor: '#ee0000'}} onPress={() => getBack()}>
-                            <Text style={{...styles.buttonText,color:'white'}}>Volver</Text>
+                        {canSeen ? '' : <TouchableOpacity style={{ ...styles.button, backgroundColor: '#ffffff' }} ref={registrar} onPress={() => createProducto()}>
+                            <Text style={{ ...styles.buttonText, color: 'black' }}>Registrar</Text>
+                        </TouchableOpacity>}
+
+                        <TouchableOpacity style={{ ...styles.button, backgroundColor: '#ee0000' }} onPress={() => getBack()}>
+                            <Text style={{ ...styles.buttonText, color: 'white' }}>Volver</Text>
                         </TouchableOpacity>
                     </View>
                     <MessageBubble text={notification} whatType={isVisible} />

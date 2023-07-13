@@ -40,6 +40,7 @@ export const Menu = (prop) => {
         await fetch('http://74.208.94.23:8082/api/producto/delete/'+item.id);
         setNotification('Se ha eliminado '+item.nombre);
         setIsVisible('good');
+        getProducts();
         }catch(e){
             console.log(e);
             setNotification('Ha ocurrido un error');
@@ -65,6 +66,11 @@ export const Menu = (prop) => {
                         <TouchableOpacity style={styles.buttonRegistrar}>
                             <Text style={styles.buttonText} onPress={() => gotoCreate()}>Nuevo
                                 <Icon name="plus" size={15} color="#b876ff" />
+                            </Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={{...styles.buttonRegistrar,marginLeft:10}}>
+                            <Text style={styles.buttonText} onPress={() => getProducts()}>Cargar de nuevo
+                                <Icon name="redo" size={15} color="#b876ff" />
                             </Text>
                         </TouchableOpacity>
                     </View>
@@ -105,8 +111,8 @@ export const Menu = (prop) => {
                             })
                         }
                     </View>
-                    <MessageBubble text={notification} whatType={isVisible} />
                 </View>
+                <MessageBubble text={notification} whatType={isVisible} />
             </LinearGradient>
         </View>
     );

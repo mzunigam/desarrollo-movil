@@ -9,26 +9,25 @@ export const login = async (username, password, setNotification, setIsVisible, n
         setTimeout(() => {
             setIsVisible('');
         },3000);
-        return null;
     }else if(username && !password) {
         setNotification('Falta llenar la contraseña');
         setIsVisible('error');
         setTimeout(() => {
             setIsVisible('');
         },3000);
-        return null;
+
     }else if(!username && password) {
         setNotification('Falta llenar el usuario');
         setIsVisible('error');
         setTimeout(() => {
             setIsVisible('');
         },3000);
-        return null;
     }
 
     try {
         const response = await fetch(`http://74.208.94.23:8082/api/user/find/${username}`);
         const json = await response.json();
+        console.log(json.password,password);
         if(json.password === password){
             setNotification('Se ha validado correctamente');
             setIsVisible('good');
@@ -46,14 +45,4 @@ export const login = async (username, password, setNotification, setIsVisible, n
     }catch (error) {
         console.error(error);
     }
-
-
-    setNotification('Se ha validado correctamente');
-    setIsVisible('good');
-    setTimeout(() => {
-        setIsVisible('');
-        navigate('menu', { username });
-    }, 100);
-
-    return null;
 }
